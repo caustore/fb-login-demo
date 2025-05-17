@@ -1,65 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Facebook Login Demo</title>
+<meta charset="UTF-8" />
+<title>Facebook Login Demo</title>
 </head>
 <body>
-  <div id="fb-root"></div>
+<div id="fb-root"></div>
 
-  <button id="fb-login-btn" onclick="fbLogin()" style="display:none;">Đăng nhập bằng Facebook</button>
+<!-- Nút đăng nhập Facebook chuẩn -->
+<fb:login-button 
+  scope="public_profile,email"
+  onlogin="checkLoginState();">
+</fb:login-button>
 
-  <script>
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId      : '1027221792328145', // Thay bằng App ID của bạn
-        cookie     : true,
-        xfbml      : true,
-        version    : 'v17.0'
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '1027221792328145', // Thay bằng App ID của bạn
+      cookie     : true,
+      xfbml      : true,
+      version    : 'v17.0'
+    });
+
+    FB.AppEvents.logPageView();
+
+    // Kiểm tra trạng thái đăng nhập khi tải trang
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "https://connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  }
+
+  function statusChangeCallback(response) {
+    console.log('Facebook login status:', response);
+    if (response.status === 'connected') {
+      FB.api('/me', {fields: 'name,email'}, function(user) {
+        alert('Xin chào, ' + user.name + ' (' + user.email + ')');
       });
-
-      FB.AppEvents.logPageView();
-
-      // Kiểm tra trạng thái đăng nhập
-      FB.getLoginStatus(function(response) {
-        statusChangeCallback(response);
-      });
-    };
-
-    (function(d, s, id){
-       var js, fjs = d.getElementsByTagName(s)[0];
-       if (d.getElementById(id)) {return;}
-       js = d.createElement(s); js.id = id;
-       js.src = "https://connect.facebook.net/en_US/sdk.js";
-       fjs.parentNode.insertBefore(js, fjs);
-     }(document, 'script', 'facebook-jssdk'));
-
-    function statusChangeCallback(response) {
-      console.log('Facebook login status:', response);
-      if (response.status === 'connected') {
-        // Người dùng đã đăng nhập và cho phép app
-        FB.api('/me', function(user) {
-          alert('Xin chào, ' + user.name);
-          document.getElementById('fb-login-btn').style.display = 'none';
-        });
-      } else {
-        // Người dùng chưa đăng nhập hoặc chưa cho phép app
-        document.getElementById('fb-login-btn').style.display = 'block';
-      }
+    } else {
+      alert('Bạn chưa đăng nhập hoặc chưa cấp quyền ứng dụng.');
     }
-
-    function fbLogin() {
-      FB.login(function(response) {
-        if (response.authResponse) {
-          FB.api('/me', function(user) {
-            alert('Đăng nhập thành công! Xin chào, ' + user.name);
-            document.getElementById('fb-login-btn').style.display = 'none';
-          });
-        } else {
-          alert('Bạn đã hủy đăng nhập.');
-        }
-      }, {scope: 'public_profile,email'});
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
